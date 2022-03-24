@@ -1,0 +1,26 @@
+Sub TestSelenium()
+Dim MySht As Worksheet
+Dim MyRng As Range, cell As Range
+Dim linkstr As String, price As String
+    Set MySht = ThisWorkbook.Sheets("Sheet1")
+    Set MyRng = MySht.UsedRange.Columns("B")
+    For Each cell In MyRng.Cells
+        cell.Activate
+        If InStr(1, cell, "https://") > 0 Then
+            linkstr = cell.Value
+            Dim MyBrowser As Selenium.ChromeDriver
+            Set MyBrowser = New Selenium.ChromeDriver
+            MyBrowser.Start
+            MyBrowser.Get linkstr
+            If MyBrowser.FindElementsByXPath("//span[@class='a-price aok-align-center reinventPricePriceToPayPadding priceToPay']//span[@class='a-price-whole']").Count > 0 Then
+                price = "$" & MyBrowser.FindElementByXPath("//span[@class='a-price aok-align-center reinventPricePriceToPayPadding priceToPay']//span[@class='a-price-whole']").Text & "." & MyBrowser.FindElementByXPath("//span[@class='a-price aok-align-center reinventPricePriceToPayPadding priceToPay']//span[@class='a-price-fraction']").Text
+                cell.Offset(0, 1).Value = price
+            Else:
+                If MyBrowser.FindElementsByXPath("//span[@class='a-price a-text-price header-price a-size-base a-text-normal']//span[@aria-hidden='true']").Count > 0 Then
+                    price = MyBrowser.FindElementByXPath("//span[@class='a-price a-text-price header-price a-size-base a-text-normal']//span[@aria-hidden='true']").Text
+                    cell.Offset(0, 1).Value = price
+                End If
+            End If
+        End If
+    Next
+End Sub
